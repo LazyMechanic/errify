@@ -1,2 +1,3 @@
 [workspace]
-members = ["errify", "errify_derive", "test_suite"]
+members = ["errify", "errify_derive"]
+resolver = "2"
