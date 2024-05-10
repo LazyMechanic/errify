@@ -1,0 +1,2 @@
+[workspace]
+members = ["errify", "errify_derive", "test_suite"]

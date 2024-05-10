@@ -1,0 +1,9 @@
+[package]
+name = "errify_test_suite"
+version = "0.0.0"
+authors = ["LazyMechanic <asharnrus@gmail.com>"]
+edition = "2021"
+publish = false
+
+[dev-dependencies]
+errify = { path = "../errify" }

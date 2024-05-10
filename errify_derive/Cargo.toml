@@ -1,0 +1,21 @@
+[package]
+name = "errify_derive"
+description = "Function error context provider via anyhow/erye (macros)"
+authors = ["LazyMechanic <asharnrus@gmail.com>"]
+license = "MIT OR Apache-2.0"
+version = "0.1.0"
+repository = "https://github.com/LazyMechanic/errify"
+documentation = "https://docs.rs/errify"
+keywords = ["context", "error", "error-context", "anyhow", "eyre"]
+categories = ["rust-patterns"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "2.0", features = ["full"] }
+quote = "1.0"
+proc-macro2 = "1.0"
