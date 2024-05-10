@@ -1,0 +1,94 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@nextest
+
+      - name: 'Test (errify + default)'
+        run: cargo nextest run --package errify
+      - name: 'Test (errify + anyhow)'
+        run: cargo nextest run --features=anyhow --no-default-features --package errify
+      - name: 'Test (errify + eyre)'
+        run: cargo nextest run --features=eyre --no-default-features --package errify
+
+      - name: 'Test (errify_derive + default)'
+        run: cargo nextest run --package errify_derive
+      - name: 'Test (errify_derive + anyhow)'
+        run: cargo nextest run --features=anyhow --no-default-features --package errify_derive
+      - name: 'Test (errify_derive + eyre)'
+        run: cargo nextest run --features=eyre --no-default-features --package errify_derive
+
+  semver-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: 'Check semver (errify + anyhow)'
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+        with:
+          package: errify
+          features: anyhow
+      - name: 'Check semver (errify + eyre)'
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+        with:
+          package: errify
+          features: eyre
+
+      - name: 'Check semver (errify_derive + anyhow)'
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+        with:
+          package: errify_derive
+          features: anyhow
+      - name: 'Check semver (errify_derive + eyre)'
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+        with:
+          package: errify_derive
+          features: eyre
+
+  crates_io_publish:
+    name: 'Publish (crates.io)'
+    needs:
+      - test
+      - semver-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: 'cargo-release Cache'
+        id: cargo_release_cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/bin/cargo-release
+          key: ${{ runner.os }}-cargo-release
+
+      - run: cargo install cargo-release
+        if: steps.cargo_release_cache.outputs.cache-hit != 'true'
+
+      - name: 'cargo login'
+        run: cargo login ${{ secrets.CRATES_IO_API_TOKEN }}
+
+      # allow-branch HEAD is because GitHub actions switches
+      # to the tag while building, which is a detached head
+      - name: 'cargo release publish'
+        run: |-
+          cargo release \
+            publish \
+            --workspace \
+            --all-features \
+            --allow-branch HEAD \
+            --no-confirm \
+            --no-verify \
+            --execute
