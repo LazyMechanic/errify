@@ -5,10 +5,10 @@
 //!
 //! ## Features
 //!
-//! | Feature                         | Desciption                                                   |
-//! |---------------------------------|--------------------------------------------------------------|
-//! | `anyhow` *(enabled by default)* | Enables error and context providers via the [`anyhow`] crate |
-//! | `eyre`                          | Enables error and context providers via the [`eyre`] crate   |
+//! | Feature                         | Description                                                   |
+//! |---------------------------------|---------------------------------------------------------------|
+//! | `anyhow` *(enabled by default)* | Enables error and context providers via the [`anyhow`] crate  |
+//! | `eyre`                          | Enables error and context providers via the [`eyre`] crate    |
 //!
 //! ### Simple context
 //!
