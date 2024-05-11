@@ -24,12 +24,12 @@ jobs:
       - name: 'Test (errify + eyre)'
         run: cargo nextest run --features=eyre --no-default-features --package errify
 
-      - name: 'Test (errify_derive + default)'
-        run: cargo nextest run --package errify_derive
-      - name: 'Test (errify_derive + anyhow)'
-        run: cargo nextest run --features=anyhow --no-default-features --package errify_derive
-      - name: 'Test (errify_derive + eyre)'
-        run: cargo nextest run --features=eyre --no-default-features --package errify_derive
+      - name: 'Test (errify-macros + default)'
+        run: cargo nextest run --package errify-macros
+      - name: 'Test (errify-macros + anyhow)'
+        run: cargo nextest run --features=anyhow --no-default-features --package errify-macros
+      - name: 'Test (errify-macros + eyre)'
+        run: cargo nextest run --features=eyre --no-default-features --package errify-macros
 
   semver-checks:
     runs-on: ubuntu-latest
@@ -46,15 +46,15 @@ jobs:
           package: errify
           features: eyre
 
-      - name: 'Check semver (errify_derive + anyhow)'
+      - name: 'Check semver (errify-macros + anyhow)'
         uses: obi1kenobi/cargo-semver-checks-action@v2
         with:
-          package: errify_derive
+          package: errify-macros
           features: anyhow
-      - name: 'Check semver (errify_derive + eyre)'
+      - name: 'Check semver (errify-macros + eyre)'
         uses: obi1kenobi/cargo-semver-checks-action@v2
         with:
-          package: errify_derive
+          package: errify-macros
           features: eyre
 
   crates_io_publish:

@@ -130,10 +130,10 @@
 //!
 //! [`anyhow`]: https://docs.rs/anyhow/latest/anyhow/
 //! [`eyre`]: https://docs.rs/eyre/latest/eyre/
-//! [`context`]: errify_derive::context
-//! [`with_context`]: errify_derive::with_context
+//! [`context`]: errify_macros::context
+//! [`with_context`]: errify_macros::with_context
 
-pub use errify_derive::{context, with_context};
+pub use errify_macros::{context, with_context};
 
 #[doc(hidden)]
 pub mod __private {

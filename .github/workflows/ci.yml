@@ -51,12 +51,12 @@ jobs:
       - name: 'Clippy (errify + eyre)'
         run: cargo clippy --features=eyre --no-default-features --package errify -- -D warnings
 
-      - name: 'Clippy (errify_derive + default)'
-        run: cargo clippy --package errify_derive -- -D warnings
-      - name: 'Clippy (errify_derive + anyhow)'
-        run: cargo clippy --features=anyhow --no-default-features --package errify_derive -- -D warnings
-      - name: 'Clippy (errify_derive + eyre)'
-        run: cargo clippy --features=eyre --no-default-features --package errify_derive -- -D warnings
+      - name: 'Clippy (errify-macros + default)'
+        run: cargo clippy --package errify-macros -- -D warnings
+      - name: 'Clippy (errify-macros + anyhow)'
+        run: cargo clippy --features=anyhow --no-default-features --package errify-macros -- -D warnings
+      - name: 'Clippy (errify-macros + eyre)'
+        run: cargo clippy --features=eyre --no-default-features --package errify-macros -- -D warnings
 
   test:
     runs-on: ubuntu-latest
@@ -73,9 +73,9 @@ jobs:
       - name: 'Test (errify + eyre)'
         run: cargo nextest run --features=eyre --no-default-features --package errify
 
-      - name: 'Test (errify_derive + default)'
-        run: cargo nextest run --package errify_derive
-      - name: 'Test (errify_derive + anyhow)'
-        run: cargo nextest run --features=anyhow --no-default-features --package errify_derive
-      - name: 'Test (errify_derive + eyre)'
-        run: cargo nextest run --features=eyre --no-default-features --package errify_derive
+      - name: 'Test (errify-macros + default)'
+        run: cargo nextest run --package errify-macros
+      - name: 'Test (errify-macros + anyhow)'
+        run: cargo nextest run --features=anyhow --no-default-features --package errify-macros
+      - name: 'Test (errify-macros + eyre)'
+        run: cargo nextest run --features=eyre --no-default-features --package errify-macros

@@ -1,5 +1,5 @@
 [package]
-name = "errify_derive"
+name = "errify-macros"
 description = "Function error context provider via anyhow/erye (macros)"
 authors = ["LazyMechanic <asharnrus@gmail.com>"]
 license = "MIT OR Apache-2.0"
