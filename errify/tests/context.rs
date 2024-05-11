@@ -21,6 +21,20 @@ impl Display for CustomError {
 impl Error for CustomError {}
 
 #[test]
+fn literal_position_arg() {
+    #[errify::context("literal {arg} = {}", arg)]
+    fn test(arg: i32) -> Result<i32, CustomError> {
+        Err(CustomError(arg))
+    }
+
+    let err = test(1).unwrap_err();
+    let context_err = err.to_string();
+    let custom_err = err.root_cause().to_string();
+    assert_eq!(context_err, "literal 1 = 1");
+    assert_eq!(custom_err, "CustomError(1)");
+}
+
+#[test]
 fn simple_literal() {
     #[errify::context("literal {arg}")]
     fn test(arg: i32) -> Result<i32, CustomError> {
@@ -35,7 +49,7 @@ fn simple_literal() {
 }
 
 #[test]
-fn simple_custom_error() {
+fn simple_expr() {
     #[errify::context(CustomError::new(2))]
     fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
@@ -63,7 +77,7 @@ async fn async_literal() {
 }
 
 #[tokio::test]
-async fn async_custom_error() {
+async fn async_expr() {
     #[errify::context(CustomError::new(2))]
     async fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
@@ -91,7 +105,7 @@ fn unsafe_literal() {
 }
 
 #[test]
-fn unsafe_custom_error() {
+fn unsafe_expr() {
     #[errify::context(CustomError::new(2))]
     unsafe fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
@@ -119,7 +133,7 @@ async fn async_unsafe_literal() {
 }
 
 #[tokio::test]
-async fn async_unsafe_custom_error() {
+async fn async_unsafe_expr() {
     #[errify::context(CustomError::new(2))]
     async unsafe fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))

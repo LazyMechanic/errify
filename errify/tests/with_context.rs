@@ -99,7 +99,7 @@ fn unsafe_literal() {
 }
 
 #[test]
-fn unsafe_custom_error() {
+fn unsafe_fn() {
     fn context() -> impl Display {
         CustomError::new(2)
     }
@@ -117,7 +117,7 @@ fn unsafe_custom_error() {
 }
 
 #[tokio::test]
-async fn async_unsafe_literal() {
+async fn async_unsafe_closure() {
     #[errify::with_context(|| format!("literal {arg}"))]
     async unsafe fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
@@ -131,7 +131,7 @@ async fn async_unsafe_literal() {
 }
 
 #[tokio::test]
-async fn async_unsafe_custom_error() {
+async fn async_unsafe_fn() {
     fn context() -> impl Display {
         CustomError::new(2)
     }
