@@ -14,28 +14,39 @@ pub enum ContextArgs {
         lit: LitStr,
         args: Punctuated<Expr, Token![,]>,
     },
-    ErrorType {
+    Expr {
         expr: Expr,
     },
 }
 
 impl Parse for ContextArgs {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        if input.is_empty() {
-            Ok(Self::None { span: input.span() })
+        let res = if input.is_empty() {
+            Self::None { span: input.span() }
         } else if input.peek(LitStr) {
-            Ok(Self::Literal {
-                lit: input.parse()?,
-                args: input.parse_terminated(Expr::parse, Token![,])?,
-            })
+            let lit = input.parse()?;
+            let comma = input.parse::<Option<Token![,]>>()?;
+            let args = if comma.is_some() {
+                input.parse_terminated(Expr::parse, Token![,])?
+            } else {
+                Default::default()
+            };
+
+            Self::Literal { lit, args }
         } else if let Ok(expr) = input.parse() {
-            Ok(Self::ErrorType { expr })
+            Self::Expr { expr }
         } else {
-            Err(syn::Error::new(
+            return Err(syn::Error::new(
                 input.span(),
                 "The macro supports literal with positions arguments and custom error only",
-            ))
+            ));
+        };
+
+        if !input.is_empty() {
+            return Err(syn::Error::new(input.span(), "Unexpected tokens"));
         }
+
+        Ok(res)
     }
 }
 
@@ -46,19 +57,24 @@ pub enum WithContextArgs {
 
 impl Parse for WithContextArgs {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        if input.peek(Token![|]) && input.peek2(Token![|]) {
-            Ok(Self::Closure {
+        let res = if input.peek(Token![|]) && input.peek2(Token![|]) {
+            Self::Closure {
                 def: input.parse()?,
-            })
+            }
         } else if let Ok(path) = input.parse() {
-            Ok(Self::Function { path })
+            Self::Function { path }
         } else {
-            Err(syn::Error::new(
+            return Err(syn::Error::new(
                 input.span(),
-                "The macro supports \
-                    closure and function only",
-            ))
+                "The macro supports closure and function only",
+            ));
+        };
+
+        if !input.is_empty() {
+            return Err(syn::Error::new(input.span(), "Unexpected tokens"));
         }
+
+        Ok(res)
     }
 }
 
@@ -86,7 +102,7 @@ impl From<ContextArgs> for Args {
         match value {
             ContextArgs::None { span } => Self::None { span },
             ContextArgs::Literal { lit, args } => Self::Literal { lit, args },
-            ContextArgs::ErrorType { expr } => Self::ErrorType { expr },
+            ContextArgs::Expr { expr } => Self::ErrorType { expr },
         }
     }
 }

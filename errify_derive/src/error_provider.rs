@@ -2,6 +2,7 @@ use proc_macro2::Span;
 use syn::{parse_quote, Type};
 
 #[allow(clippy::needless_return)]
+#[allow(unreachable_code)]
 pub fn generic() -> syn::Result<Type> {
     if cfg!(feature = "anyhow") && cfg!(feature = "eyre") {
         return Err(syn::Error::new(

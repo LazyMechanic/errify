@@ -66,7 +66,7 @@ impl Output {
                 ))
             }
             Args::Literal { lit, args } => ContextData::Literal { lit, args },
-            Args::ErrorType { expr } => ContextData::ErrorType { expr },
+            Args::ErrorType { expr } => ContextData::Expr { expr },
             Args::Closure { def } => ContextData::Closure { def },
             Args::Function { path } => ContextData::Function { path },
         };
@@ -105,7 +105,7 @@ impl Output {
         )
     }
 
-    fn parse_impl(args: Args, _input: ImplItem) -> syn::Result<Self> {
+    fn parse_impl(_args: Args, _input: ImplItem) -> syn::Result<Self> {
         unimplemented!("Using the macro with a impl block is not yet supported")
     }
 }
