@@ -104,7 +104,6 @@ fn unsafe_custom_error() {
     assert_eq!(custom_err, "CustomError(1)");
 }
 
-
 #[tokio::test]
 async fn async_unsafe_literal() {
     #[errify::context("literal {arg}")]

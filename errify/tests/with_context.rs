@@ -36,7 +36,9 @@ fn simple_closure() {
 
 #[test]
 fn simple_fn() {
-    fn context() -> impl Display { CustomError::new(2) }
+    fn context() -> impl Display {
+        CustomError::new(2)
+    }
 
     #[errify::with_context(context)]
     fn test(arg: i32) -> Result<i32, CustomError> {
@@ -66,7 +68,9 @@ async fn async_closure() {
 
 #[tokio::test]
 async fn async_fn() {
-    fn context() -> impl Display { CustomError::new(2) }
+    fn context() -> impl Display {
+        CustomError::new(2)
+    }
 
     #[errify::with_context(context)]
     async fn test(arg: i32) -> Result<i32, CustomError> {
@@ -96,7 +100,9 @@ fn unsafe_literal() {
 
 #[test]
 fn unsafe_custom_error() {
-    fn context() -> impl Display { CustomError::new(2) }
+    fn context() -> impl Display {
+        CustomError::new(2)
+    }
 
     #[errify::with_context(context)]
     unsafe fn test(arg: i32) -> Result<i32, CustomError> {
@@ -126,7 +132,9 @@ async fn async_unsafe_literal() {
 
 #[tokio::test]
 async fn async_unsafe_custom_error() {
-    fn context() -> impl Display { CustomError::new(2) }
+    fn context() -> impl Display {
+        CustomError::new(2)
+    }
 
     #[errify::with_context(context)]
     async unsafe fn test(arg: i32) -> Result<i32, CustomError> {
