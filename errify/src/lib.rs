@@ -4,11 +4,11 @@
 //! via [`anyhow`] and [`eyre`] crates.
 //!
 //! ## Features
+//! - `anyhow` *(enabled by default)*: Enables error and context providers via the [`anyhow`] crate
+//! - `eyre`: Enables error and context providers via the [`eyre`] crate
 //!
-//! | Feature                         | Description                                                   |
-//! |---------------------------------|---------------------------------------------------------------|
-//! | `anyhow` *(enabled by default)* | Enables error and context providers via the [`anyhow`] crate  |
-//! | `eyre`                          | Enables error and context providers via the [`eyre`] crate    |
+//! Simultaneously enabling both features when using the [`context`],
+//! or [`with_context`] macros will result in a compilation error.
 //!
 //! ### Simple context
 //!
@@ -130,6 +130,8 @@
 //!
 //! [`anyhow`]: https://docs.rs/anyhow/latest/anyhow/
 //! [`eyre`]: https://docs.rs/eyre/latest/eyre/
+//! [`context`]: errify_derive::context
+//! [`with_context`]: errify_derive::with_context
 
 pub use errify_derive::{context, with_context};
 
