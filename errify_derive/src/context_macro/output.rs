@@ -60,7 +60,7 @@ impl Output {
             Args::None { .. } => {
                 return Err(syn::Error::new(
                     args.span(),
-                    "The `#[errify::context_macro(...)]` macro requires arguments \
+                    "The macro requires arguments \
                         (literal with positions arguments or custom error) \
                         above the function",
                 ))
@@ -99,18 +99,14 @@ impl Output {
     }
 
     fn parse_method(_args: Args, _input: ItemFn) -> syn::Result<Self> {
-        todo!("deselfify fn args and use same algorithm as parse_func")
+        // TODO: deselfify fn args and use same algorithm as parse_func
+        unimplemented!(
+            "Using the macro with a method (with the Self argument) is not yet supported"
+        )
     }
 
     fn parse_impl(args: Args, _input: ImplItem) -> syn::Result<Self> {
-        if !matches!(args, Args::None { .. }) {
-            return Err(syn::Error::new(
-                args.span(),
-                "The `#[errify::context_macro]` macro requires no arguments for the impl block",
-            ));
-        }
-
-        todo!()
+        unimplemented!("Using the macro with a impl block is not yet supported")
     }
 }
 

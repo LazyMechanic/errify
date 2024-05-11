@@ -33,8 +33,7 @@ impl Parse for ContextArgs {
         } else {
             Err(syn::Error::new(
                 input.span(),
-                "The `#[errify::context_macro(...)]` macro supports \
-                    literal with positions arguments and custom error only",
+                "The macro supports literal with positions arguments and custom error only",
             ))
         }
     }
@@ -56,7 +55,7 @@ impl Parse for WithContextArgs {
         } else {
             Err(syn::Error::new(
                 input.span(),
-                "The `#[errify::with_context(...)]` macro supports \
+                "The macro supports \
                     closure and function only",
             ))
         }
@@ -135,7 +134,7 @@ impl Parse for Input {
         } else {
             Err(syn::Error::new(
                 input.span(),
-                "The `#[errify::context_macro(...)]` macro supports only impl block or function",
+                "The macro supports only impl block or function",
             ))
         }
     }
