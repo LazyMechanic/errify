@@ -18,6 +18,9 @@ errify_derive = { version = "0.1.0", path = "../errify_derive", default-features
 anyhow = { version = "1.0", optional = true }
 eyre = { version = "0.6", optional = true }
 
+[dev-dependencies]
+tokio = { version = "1.37.0", features = ["full"] }
+
 [features]
 default = ["anyhow"]
 
