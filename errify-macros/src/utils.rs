@@ -1,9 +1,6 @@
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{format_ident, ToTokens};
-use syn::{
-    punctuated::Punctuated, spanned::Spanned, Attribute, FnArg, GenericArgument, Pat,
-    PathArguments, ReturnType, Token, Type,
-};
+use quote::ToTokens;
+use syn::{spanned::Spanned, Attribute, GenericArgument, PathArguments, ReturnType, Token, Type};
 
 pub fn ok_ty(return_ty: &ReturnType) -> syn::Result<Type> {
     let err = |span: Span| syn::Error::new(span, "Invalid return type. Expected `Result<...>`");
@@ -32,43 +29,6 @@ pub fn ok_ty(return_ty: &ReturnType) -> syn::Result<Type> {
     };
 
     Ok(ok_ty.clone())
-}
-
-pub fn clear_inputs<'a>(
-    inputs: impl IntoIterator<Item = &'a FnArg>,
-) -> syn::Result<Punctuated<CleanFnArg, Token![,]>> {
-    inputs
-        .into_iter()
-        .enumerate()
-        .map(|(idx, input)| match input {
-            FnArg::Receiver(_) => Err(syn::Error::new(
-                input.span(),
-                "`self` argument not supported",
-            )),
-            FnArg::Typed(pat_ty) => {
-                let ident = match &*pat_ty.pat {
-                    Pat::Ident(ident) => ident.ident.clone(),
-                    _ => format_ident!("arg{idx}"),
-                };
-
-                Ok(CleanFnArg {
-                    attrs: pat_ty.attrs.clone(),
-                    ident,
-                    colon_token: Default::default(),
-                    ty: pat_ty.ty.clone(),
-                })
-            }
-        })
-        .collect()
-}
-
-pub fn call_inputs<'a>(
-    inputs: impl IntoIterator<Item = &'a CleanFnArg>,
-) -> Punctuated<Ident, Token![,]> {
-    inputs
-        .into_iter()
-        .map(|input| input.ident.clone())
-        .collect()
 }
 
 pub struct CleanFnArg {

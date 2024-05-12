@@ -1,11 +1,11 @@
-mod context_macro;
 mod context_provider;
+mod errify_macro;
 mod error_provider;
 mod utils;
 
 use proc_macro::TokenStream;
 
-use crate::context_macro::{context_impl, with_context_impl};
+use crate::errify_macro::{errify_impl, errify_with_impl};
 
 /// Macro that provides error context on entire function.
 /// Supports `async` and `unsafe` functions.
@@ -14,7 +14,9 @@ use crate::context_macro::{context_impl, with_context_impl};
 ///
 /// ### Format string with arguments
 /// ```ignore
-/// #[errify::context("Custom error context, with argument capturing {arg} = {}", arg)]
+/// use errify::errify;
+///
+/// #[errify("Custom error context, with argument capturing {arg} = {}", arg)]
 /// fn func(arg: i32) -> Result<(), CustomError> {
 ///     // ...
 /// }
@@ -22,7 +24,9 @@ use crate::context_macro::{context_impl, with_context_impl};
 ///
 /// ### Expression
 /// ```ignore
-/// #[errify::context(String::from("Custom error context"))]
+/// use errify::errify;
+///
+/// #[errify(String::from("Custom error context"))]
 /// fn func(arg: i32) -> Result<(), CustomError> {
 ///     // ...
 /// }
@@ -30,8 +34,8 @@ use crate::context_macro::{context_impl, with_context_impl};
 /// Constraint is `T: Display + Send + Sync + 'static`.
 ///
 #[proc_macro_attribute]
-pub fn context(args: TokenStream, input: TokenStream) -> TokenStream {
-    match context_impl(args.into(), input.into()) {
+pub fn errify(args: TokenStream, input: TokenStream) -> TokenStream {
+    match errify_impl(args.into(), input.into()) {
         Ok(tokens) => tokens.into(),
         Err(diag) => diag.emit_as_expr_tokens().into(),
     }
@@ -44,7 +48,9 @@ pub fn context(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ### Closure
 /// ```ignore
-/// #[errify::with_context(|| "Custom error context from closure")]
+/// use errify::errify_with;
+///
+/// #[errify_with(|| "Custom error context from closure")]
 /// fn func(arg: i32) -> Result<(), CustomError> {
 ///     // ...
 /// }
@@ -52,9 +58,11 @@ pub fn context(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ### Function
 /// ```ignore
+/// use errify::errify_with;
+///
 /// fn context_provider() -> impl Display { "Context from function" }
 ///
-/// #[errify::with_context(context_provider)]
+/// #[errify_with(context_provider)]
 /// fn func(arg: i32) -> Result<(), CustomError> {
 ///     // ...
 /// }
@@ -62,8 +70,8 @@ pub fn context(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// Constraint is `F: FnOnce() -> impl Display + Send + Sync + 'static`.
 #[proc_macro_attribute]
-pub fn with_context(args: TokenStream, input: TokenStream) -> TokenStream {
-    match with_context_impl(args.into(), input.into()) {
+pub fn errify_with(args: TokenStream, input: TokenStream) -> TokenStream {
+    match errify_with_impl(args.into(), input.into()) {
         Ok(tokens) => tokens.into(),
         Err(diag) => diag.emit_as_expr_tokens().into(),
     }

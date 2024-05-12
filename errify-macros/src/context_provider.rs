@@ -23,7 +23,7 @@ pub fn generic(call_expr: Expr, data: ContextData) -> syn::Result<Expr> {
     if cfg!(feature = "anyhow") && cfg!(feature = "eyre") {
         return Err(syn::Error::new(
             Span::call_site(),
-            "Ambiguous using context_macro provider. Choose either `anyhow` or `eyre`",
+            "Ambiguous using errify_macro provider. Choose either `anyhow` or `eyre`",
         ));
     }
 

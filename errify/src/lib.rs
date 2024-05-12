@@ -7,8 +7,8 @@
 //! - `anyhow` *(enabled by default)*: Enables error and context providers via the [`anyhow`] crate
 //! - `eyre`: Enables error and context providers via the [`eyre`] crate
 //!
-//! Simultaneously enabling both features when using the [`context`],
-//! or [`with_context`] macros will result in a compilation error.
+//! Simultaneously enabling both features when using the [`errify`],
+//! or [`errify_with`] macros will result in a compilation error.
 //!
 //! ### Simple context
 //!
@@ -22,7 +22,9 @@
 //! #     }
 //! # }
 //! # impl std::error::Error for CustomError {}
-//! #[errify::context("Custom error context, with argument capturing {arg} = {}", arg)]
+//! use errify::errify;
+//!
+//! #[errify("Custom error context, with argument capturing {arg} = {}", arg)]
 //! fn func(arg: i32) -> Result<(), CustomError> {
 //!     // ...
 //!     # Err(CustomError)
@@ -63,12 +65,18 @@
 //! #     pub(crate) use anyhow;
 //! # }
 //! fn func(arg: i32) -> Result<(), anyhow::Error> {
-//!     fn _func(arg: i32) -> Result<(), CustomError> {
-//!         // ...
-//!         # Err(CustomError)
-//!     }
 //!     let ctx = anyhow::anyhow!("Custom error context, with argument capturing {arg} = {}", arg);
-//!     anyhow::Context::context(_func(arg), ctx)
+//!     anyhow::Context::context(
+//!         {
+//!             // Type inference hack
+//!             let result: Result<(), CustomError> = (move || {
+//!                 // ...
+//!                 # Err(CustomError)
+//!             })();
+//!             result
+//!         },
+//!         ctx,
+//!     )
 //! }
 //! ```
 //!
@@ -83,7 +91,9 @@
 //! #     }
 //! # }
 //! # impl std::error::Error for CustomError {}
-//! #[errify::context(String::from("Hello context from String"))]
+//! use errify::errify;
+//!
+//! #[errify(String::from("Hello context from String"))]
 //! fn func(arg: i32) -> Result<(), CustomError> {
 //!     // ...
 //!     # Err(CustomError)
@@ -95,7 +105,7 @@
 //! # assert_eq!(err_custom, "CustomError");
 //! ```
 //!
-//! Note that `#[errify::context(...)]` macro is not lazy, a context will be created
+//! Note that [`errify`] macro is not lazy, a context will be created
 //! before the function is called.
 //!
 //! ### Lazy context
@@ -110,7 +120,9 @@
 //! #     }
 //! # }
 //! # impl std::error::Error for CustomError {}
-//! #[errify::with_context(|| format!("Wow, context from lambda, and it can also capture arguments {arg}"))]
+//! use errify::errify_with;
+//!
+//! #[errify_with(|| format!("Wow, context from lambda, and it can also capture arguments {arg}"))]
 //! fn func(arg: i32) -> Result<(), CustomError> {
 //!     // ...
 //!     # Err(CustomError)
@@ -130,10 +142,10 @@
 //!
 //! [`anyhow`]: https://docs.rs/anyhow/latest/anyhow/
 //! [`eyre`]: https://docs.rs/eyre/latest/eyre/
-//! [`context`]: errify_macros::context
-//! [`with_context`]: errify_macros::with_context
+//! [`errify`]: errify_macros::errify
+//! [`errify_with`]: errify_macros::errify_with
 
-pub use errify_macros::{context, with_context};
+pub use errify_macros::{errify, errify_with};
 
 #[doc(hidden)]
 pub mod __private {

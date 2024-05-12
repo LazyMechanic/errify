@@ -3,6 +3,8 @@ use std::{
     fmt::{Debug, Display, Formatter},
 };
 
+use errify::errify;
+
 #[derive(Debug)]
 struct CustomError(i32);
 
@@ -22,7 +24,7 @@ impl Error for CustomError {}
 
 #[test]
 fn literal_position_arg() {
-    #[errify::context("literal {arg} = {}", arg)]
+    #[errify("literal {arg} = {}", arg)]
     fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -36,7 +38,7 @@ fn literal_position_arg() {
 
 #[test]
 fn simple_literal() {
-    #[errify::context("literal {arg}")]
+    #[errify("literal {arg}")]
     fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -50,7 +52,7 @@ fn simple_literal() {
 
 #[test]
 fn simple_expr() {
-    #[errify::context(CustomError::new(2))]
+    #[errify(CustomError::new(2))]
     fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -64,7 +66,7 @@ fn simple_expr() {
 
 #[tokio::test]
 async fn async_literal() {
-    #[errify::context("literal {arg}")]
+    #[errify("literal {arg}")]
     async fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -78,7 +80,7 @@ async fn async_literal() {
 
 #[tokio::test]
 async fn async_expr() {
-    #[errify::context(CustomError::new(2))]
+    #[errify(CustomError::new(2))]
     async fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -92,7 +94,7 @@ async fn async_expr() {
 
 #[test]
 fn unsafe_literal() {
-    #[errify::context("literal {arg}")]
+    #[errify("literal {arg}")]
     unsafe fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -106,7 +108,7 @@ fn unsafe_literal() {
 
 #[test]
 fn unsafe_expr() {
-    #[errify::context(CustomError::new(2))]
+    #[errify(CustomError::new(2))]
     unsafe fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -120,7 +122,7 @@ fn unsafe_expr() {
 
 #[tokio::test]
 async fn async_unsafe_literal() {
-    #[errify::context("literal {arg}")]
+    #[errify("literal {arg}")]
     async unsafe fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -134,7 +136,7 @@ async fn async_unsafe_literal() {
 
 #[tokio::test]
 async fn async_unsafe_expr() {
-    #[errify::context(CustomError::new(2))]
+    #[errify(CustomError::new(2))]
     async unsafe fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }

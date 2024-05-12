@@ -3,6 +3,8 @@ use std::{
     fmt::{Debug, Display, Formatter},
 };
 
+use errify::errify_with;
+
 #[derive(Debug)]
 struct CustomError(i32);
 
@@ -22,7 +24,7 @@ impl Error for CustomError {}
 
 #[test]
 fn simple_closure() {
-    #[errify::with_context(|| format!("literal {arg}"))]
+    #[errify_with(|| format!("literal {arg}"))]
     fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -40,7 +42,7 @@ fn simple_fn() {
         CustomError::new(2)
     }
 
-    #[errify::with_context(context)]
+    #[errify_with(context)]
     fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -54,7 +56,7 @@ fn simple_fn() {
 
 #[tokio::test]
 async fn async_closure() {
-    #[errify::with_context(|| format!("literal {arg}"))]
+    #[errify_with(|| format!("literal {arg}"))]
     async fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -72,7 +74,7 @@ async fn async_fn() {
         CustomError::new(2)
     }
 
-    #[errify::with_context(context)]
+    #[errify_with(context)]
     async fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -86,7 +88,7 @@ async fn async_fn() {
 
 #[test]
 fn unsafe_literal() {
-    #[errify::with_context(|| format!("literal {arg}"))]
+    #[errify_with(|| format!("literal {arg}"))]
     unsafe fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -104,7 +106,7 @@ fn unsafe_fn() {
         CustomError::new(2)
     }
 
-    #[errify::with_context(context)]
+    #[errify_with(context)]
     unsafe fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -118,7 +120,7 @@ fn unsafe_fn() {
 
 #[tokio::test]
 async fn async_unsafe_closure() {
-    #[errify::with_context(|| format!("literal {arg}"))]
+    #[errify_with(|| format!("literal {arg}"))]
     async unsafe fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
@@ -136,7 +138,7 @@ async fn async_unsafe_fn() {
         CustomError::new(2)
     }
 
-    #[errify::with_context(context)]
+    #[errify_with(context)]
     async unsafe fn test(arg: i32) -> Result<i32, CustomError> {
         Err(CustomError(arg))
     }
