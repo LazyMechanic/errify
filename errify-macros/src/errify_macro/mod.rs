@@ -1,4 +1,4 @@
-mod input;
+pub mod input;
 mod output;
 
 use proc_macro2::TokenStream;

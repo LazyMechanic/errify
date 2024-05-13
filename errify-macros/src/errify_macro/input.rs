@@ -1,49 +1,61 @@
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    Expr, ExprClosure, ImplItemFn, LitStr, Path, Token,
+    Expr, ExprClosure, ImplItemFn, LitStr, Path, Token, Type,
 };
 
 pub struct ErrifyMacroArgs {
-    err_ty: Option<Path>,
+    err_ty: Option<Type>,
     cx: ExplicitContext,
 }
 
 impl Parse for ErrifyMacroArgs {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        // TODO:
-        // let err_ty = input.parse()?;
-        // if err_ty.is_some() {
-        //     let _ = input.parse::<Token![,]>()?;
-        // }
-        let err_ty = None;
-        let cx = input.parse()?;
+        let input_fork = input.fork();
+        if let Ok(err_ty) = input_fork.parse::<Type>() {
+            let comma = input_fork.parse::<Option<Token![,]>>()?;
+            if comma.is_some() {
+                return Ok(Self {
+                    err_ty: Some(err_ty),
+                    cx: input_fork.parse()?,
+                });
+            }
+        }
 
-        Ok(Self { err_ty, cx })
+        Ok(Self {
+            err_ty: None,
+            cx: input.parse()?,
+        })
     }
 }
 
 pub struct ErrifyWithMacroArgs {
-    err_ty: Option<Path>,
+    err_ty: Option<Type>,
     cx: LazyContext,
 }
 
 impl Parse for ErrifyWithMacroArgs {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        // TODO:
-        // let err_ty = input.parse()?;
-        // if err_ty.is_some() {
-        //     let _ = input.parse::<Token![,]>()?;
-        // }
-        let err_ty = None;
-        let cx = input.parse()?;
+        let input_fork = input.fork();
+        if let Ok(err_ty) = input_fork.parse::<Type>() {
+            let comma = input_fork.parse::<Option<Token![,]>>()?;
+            if comma.is_some() {
+                return Ok(Self {
+                    err_ty: Some(err_ty),
+                    cx: input_fork.parse()?,
+                });
+            }
+        }
 
-        Ok(Self { err_ty, cx })
+        Ok(Self {
+            err_ty: None,
+            cx: input.parse()?,
+        })
     }
 }
 
 pub struct Args {
-    pub err_ty: Option<Path>,
+    pub err_ty: Option<Type>,
     pub cx: Context,
 }
 
