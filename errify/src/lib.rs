@@ -83,6 +83,10 @@
 //! }
 //! ```
 //!
+//! Note that after desugaring your original function converts into closure and move all arguments into it.
+//! This is mean that context is created **before** call this function because of arguments, and
+//! it could lead to unnecessary allocation even for the success branch.
+//!
 //! The context can be either the format string or any expression that fits
 //! constraint `T: Display + Send + Sync + 'static`:
 //! ```
@@ -274,10 +278,10 @@ pub mod __private {
     #[inline]
     pub fn format_err(args: Arguments) -> Cow<'static, str> {
         if let Some(message) = args.as_str() {
-            // error!("literal"), can downcast to &'static str
+            // format_cx!("literal"), can downcast to &'static str
             Cow::Borrowed(message)
         } else {
-            // error!("interpolate {var}"), can downcast to String
+            // format_cx!("interpolate {var}"), can downcast to String
             Cow::Owned(fmt::format(args))
         }
     }
