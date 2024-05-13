@@ -3,7 +3,7 @@ use std::{
     fmt::{Debug, Display, Formatter},
 };
 
-use errify::errify;
+use errify::{errify, WrapErr};
 
 #[derive(Debug)]
 struct CustomError(i32);
@@ -21,6 +21,30 @@ impl Display for CustomError {
 }
 
 impl Error for CustomError {}
+
+#[derive(Debug)]
+struct CustomErrorWithContext<E> {
+    err: E,
+    cx: String,
+}
+
+impl<E> Display for CustomErrorWithContext<E> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.cx)
+    }
+}
+
+impl<E: Error + 'static> Error for CustomErrorWithContext<E> {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        Some(&self.err)
+    }
+}
+
+impl<E> WrapErr<E> for CustomErrorWithContext<E> {
+    fn wrap_err<C>(err: E, context: C) -> Self where C: Display + Send + Sync + 'static {
+        Self{ err, cx: context.to_string() }
+    }
+}
 
 #[test]
 fn literal_position_arg() {

@@ -146,24 +146,15 @@
 //! [`errify_with`]: errify_macros::errify_with
 
 extern crate alloc;
+extern crate core;
 
 #[macro_use]
 mod macros;
 
-use alloc::fmt::{Debug, Display};
+use alloc::fmt::Display;
 use std::error::Error as StdError;
 
 pub use errify_macros::{errify, errify_with};
-
-/// Provides the `msg` constructor for the error type.
-///
-/// Implements for your own type if you want to use your custom error type as an error in macros.
-pub trait FromMessage {
-    /// Create a new error object from a printable error message.
-    fn from_msg<M>(msg: M) -> Self
-    where
-        M: Display + Debug + Send + Sync + 'static;
-}
 
 /// Provides the `wrap_err` associated function for the error type.
 ///
@@ -191,16 +182,6 @@ where
     }
 }
 
-#[cfg(feature = "anyhow")]
-impl FromMessage for anyhow::Error {
-    fn from_msg<M>(context: M) -> Self
-    where
-        M: Display + Debug + Send + Sync + 'static,
-    {
-        anyhow::Error::msg(context)
-    }
-}
-
 #[cfg(feature = "eyre")]
 impl<E> WrapErr<E> for eyre::Report
 where
@@ -214,28 +195,19 @@ where
     }
 }
 
-#[cfg(feature = "eyre")]
-impl FromMessage for eyre::Report {
-    fn from_msg<C>(msg: C) -> Self
-    where
-        C: Display + Debug + Send + Sync + 'static,
-    {
-        eyre::Report::msg(msg)
-    }
-}
-
 #[doc(hidden)]
 pub mod __private {
     use alloc::fmt;
     #[doc(hidden)]
-    pub use alloc::format;
+    pub use alloc::{borrow::Cow, format};
     use core::fmt::Arguments;
     #[doc(hidden)]
-    pub use core::format_args;
-    #[doc(hidden)]
-    pub use core::result::{
-        Result,
-        Result::{Err, Ok},
+    pub use core::{
+        format_args,
+        result::{
+            Result,
+            Result::{Err, Ok},
+        },
     };
 
     #[cfg(feature = "anyhow")]
@@ -245,20 +217,15 @@ pub mod __private {
     #[doc(hidden)]
     pub use eyre;
 
-    use crate::FromMessage;
-
     #[doc(hidden)]
     #[inline]
-    pub fn format_err<E>(args: Arguments) -> E
-    where
-        E: FromMessage,
-    {
+    pub fn format_err(args: Arguments) -> Cow<'static, str> {
         if let Some(message) = args.as_str() {
             // error!("literal"), can downcast to &'static str
-            <E as FromMessage>::from_msg(message)
+            Cow::Borrowed(message)
         } else {
             // error!("interpolate {var}"), can downcast to String
-            <E as FromMessage>::from_msg(fmt::format(args))
+            Cow::Owned(fmt::format(args))
         }
     }
 }

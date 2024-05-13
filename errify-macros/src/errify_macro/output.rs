@@ -58,7 +58,8 @@ impl Output {
         };
 
         let err_ty = match args.err_ty {
-            None => {
+            #[allow(unreachable_code)]
+            None => 'err_ty: {
                 if cfg!(feature = "anyhow") && cfg!(feature = "eyre") {
                     return Err(syn::Error::new(
                         Span::call_site(),
@@ -75,12 +76,12 @@ impl Output {
 
                 #[cfg(feature = "anyhow")]
                 {
-                    parse_quote! { ::errify::__private::anyhow::Error }
+                    break 'err_ty parse_quote! { ::errify::__private::anyhow::Error };
                 }
 
                 #[cfg(feature = "eyre")]
                 {
-                    parse_quote! { ::errify::__private::eyre::Report }
+                    break 'err_ty parse_quote! { ::errify::__private::eyre::Report };
                 }
             }
             Some(ty) => ty,
@@ -130,7 +131,7 @@ pub fn apply_context(call_expr: &Expr, cx: &Context, err_ty: &Type) -> Expr {
     match cx {
         Context::Explicit(ExplicitContext::Literal { lit, args }) => parse_quote! {
             {
-                let __errify_cx = ::errify::error!(#err_ty, #lit, #args);
+                let __errify_cx = ::errify::error!(#lit, #args);
                 let __errify_res = #call_expr;
                 match __errify_res {
                     ::errify::__private::Ok(v) => Ok(v),
