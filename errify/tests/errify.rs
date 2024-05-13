@@ -41,8 +41,14 @@ impl Error for CustomErrorWithContext {
 }
 
 impl<E: Error + 'static> WrapErr<E> for CustomErrorWithContext {
-    fn wrap_err<C>(err: E, context: C) -> Self where C: Display + Send + Sync + 'static {
-        Self{ err: std::io::Error::new(std::io::ErrorKind::Other, err.to_string()), cx: context.to_string() }
+    fn wrap_err<C>(err: E, context: C) -> Self
+    where
+        C: Display + Send + Sync + 'static,
+    {
+        Self {
+            err: std::io::Error::new(std::io::ErrorKind::Other, err.to_string()),
+            cx: context.to_string(),
+        }
     }
 }
 
@@ -98,7 +104,10 @@ fn trait_method() {
     #[derive(Debug)]
     struct TraitError(Option<String>);
     impl WrapErr<TraitError> for TraitError {
-        fn wrap_err<C>(mut err: TraitError, context: C) -> Self where C: Display + Send + Sync + 'static {
+        fn wrap_err<C>(mut err: TraitError, context: C) -> Self
+        where
+            C: Display + Send + Sync + 'static,
+        {
             err.0 = Some(context.to_string());
             err
         }
@@ -120,7 +129,10 @@ fn trait_method() {
 
     let err = Trait::func(&Struct, "argument".to_owned()).unwrap_err();
     let context_err = format!("{err:?}");
-    assert_eq!(context_err, r#"TraitError(Some("literal self = Struct, arg = argument"))"#);
+    assert_eq!(
+        context_err,
+        r#"TraitError(Some("literal self = Struct, arg = argument"))"#
+    );
 }
 
 #[test]
