@@ -155,14 +155,24 @@ use std::error::Error as StdError;
 
 pub use errify_macros::{errify, errify_with};
 
-pub trait Error {
-    fn msg<M>(msg: M) -> Self
+/// Provides the `msg` constructor for the error type.
+///
+/// Implements for your own type if you want to use your custom error type as an error in macros.
+pub trait FromMessage {
+    /// Create a new error object from a printable error message.
+    fn from_msg<M>(msg: M) -> Self
     where
         M: Display + Debug + Send + Sync + 'static;
 }
 
+/// Provides the `wrap_err` associated function for the error type.
+///
+/// Implements for your own type if you want to use your custom error type as an error in macros.
 pub trait WrapErr<E> {
     /// Wrap the error value with additional context.
+    ///
+    /// The function should work similarly to [anyhow::Error::context](`https://docs.rs/anyhow/latest/anyhow/struct.Error.html#method.context`),
+    /// except that the type should take care of the `err` itself, without a generalized error type.
     fn wrap_err<C>(err: E, context: C) -> Self
     where
         C: Display + Send + Sync + 'static;
@@ -182,8 +192,8 @@ where
 }
 
 #[cfg(feature = "anyhow")]
-impl Error for anyhow::Error {
-    fn msg<M>(context: M) -> Self
+impl FromMessage for anyhow::Error {
+    fn from_msg<M>(context: M) -> Self
     where
         M: Display + Debug + Send + Sync + 'static,
     {
@@ -205,8 +215,8 @@ where
 }
 
 #[cfg(feature = "eyre")]
-impl Error for eyre::Error {
-    fn msg<C>(msg: C) -> Self
+impl FromMessage for eyre::Report {
+    fn from_msg<C>(msg: C) -> Self
     where
         C: Display + Debug + Send + Sync + 'static,
     {
@@ -235,20 +245,20 @@ pub mod __private {
     #[doc(hidden)]
     pub use eyre;
 
-    use crate::Error;
+    use crate::FromMessage;
 
     #[doc(hidden)]
     #[inline]
     pub fn format_err<E>(args: Arguments) -> E
     where
-        E: Error,
+        E: FromMessage,
     {
         if let Some(message) = args.as_str() {
             // error!("literal"), can downcast to &'static str
-            Error::msg(message)
+            <E as FromMessage>::from_msg(message)
         } else {
             // error!("interpolate {var}"), can downcast to String
-            Error::msg(fmt::format(args))
+            <E as FromMessage>::from_msg(fmt::format(args))
         }
     }
 }
