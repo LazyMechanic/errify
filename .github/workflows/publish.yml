@@ -36,27 +36,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: 'Check semver (errify + anyhow)'
+      - name: 'Check semver'
         uses: obi1kenobi/cargo-semver-checks-action@v2
-        with:
-          package: errify
-          features: anyhow
-      - name: 'Check semver (errify + eyre)'
-        uses: obi1kenobi/cargo-semver-checks-action@v2
-        with:
-          package: errify
-          features: eyre
-
-      - name: 'Check semver (errify-macros + anyhow)'
-        uses: obi1kenobi/cargo-semver-checks-action@v2
-        with:
-          package: errify-macros
-          features: anyhow
-      - name: 'Check semver (errify-macros + eyre)'
-        uses: obi1kenobi/cargo-semver-checks-action@v2
-        with:
-          package: errify-macros
-          features: eyre
 
   crates_io_publish:
     name: 'Publish (crates.io)'
