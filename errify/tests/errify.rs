@@ -53,7 +53,7 @@ impl<E: Error + 'static> WrapErr<E> for CustomErrorWithContext {
 }
 
 #[test]
-fn check_visability() {
+fn check_visibility() {
     pub mod multiple {
         use super::*;
         pub mod module {
