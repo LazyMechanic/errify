@@ -1,5 +1,5 @@
 use syn::{
-    parse::{Parse, ParseStream},
+    parse::{discouraged::Speculative, Parse, ParseStream},
     punctuated::Punctuated,
     Expr, ExprClosure, ImplItemFn, LitStr, Path, Token, Type,
 };
@@ -15,10 +15,14 @@ impl Parse for ErrifyMacroArgs {
         if let Ok(err_ty) = input_fork.parse::<Type>() {
             let comma = input_fork.parse::<Option<Token![,]>>()?;
             if comma.is_some() {
-                return Ok(Self {
+                let res = Self {
                     err_ty: Some(err_ty),
                     cx: input_fork.parse()?,
-                });
+                };
+
+                input.advance_to(&input_fork);
+
+                return Ok(res);
             }
         }
 
@@ -40,10 +44,14 @@ impl Parse for ErrifyWithMacroArgs {
         if let Ok(err_ty) = input_fork.parse::<Type>() {
             let comma = input_fork.parse::<Option<Token![,]>>()?;
             if comma.is_some() {
-                return Ok(Self {
+                let res = Self {
                     err_ty: Some(err_ty),
                     cx: input_fork.parse()?,
-                });
+                };
+
+                input.advance_to(&input_fork);
+
+                return Ok(res);
             }
         }
 

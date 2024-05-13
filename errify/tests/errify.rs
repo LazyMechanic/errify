@@ -23,27 +23,55 @@ impl Display for CustomError {
 impl Error for CustomError {}
 
 #[derive(Debug)]
-struct CustomErrorWithContext<E> {
-    err: E,
+struct CustomErrorWithContext {
+    err: std::io::Error,
     cx: String,
 }
 
-impl<E> Display for CustomErrorWithContext<E> {
+impl Display for CustomErrorWithContext {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(&self.cx)
     }
 }
 
-impl<E: Error + 'static> Error for CustomErrorWithContext<E> {
+impl Error for CustomErrorWithContext {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         Some(&self.err)
     }
 }
 
-impl<E> WrapErr<E> for CustomErrorWithContext<E> {
+impl<E: Error + 'static> WrapErr<E> for CustomErrorWithContext {
     fn wrap_err<C>(err: E, context: C) -> Self where C: Display + Send + Sync + 'static {
-        Self{ err, cx: context.to_string() }
+        Self{ err: std::io::Error::new(std::io::ErrorKind::Other, err.to_string()), cx: context.to_string() }
     }
+}
+
+#[test]
+fn custom_error_literal() {
+    #[errify(CustomErrorWithContext, "literal {arg} = {}", arg)]
+    fn test(arg: i32) -> Result<i32, CustomError> {
+        Err(CustomError(arg))
+    }
+
+    let err = test(1).unwrap_err();
+    let context_err = err.to_string();
+    let custom_err = err.err.to_string();
+    assert_eq!(context_err, "literal 1 = 1");
+    assert_eq!(custom_err, "CustomError(1)");
+}
+
+#[test]
+fn custom_error_expr() {
+    #[errify(CustomErrorWithContext, CustomError::new(2))]
+    fn test(arg: i32) -> Result<i32, CustomError> {
+        Err(CustomError(arg))
+    }
+
+    let err = test(1).unwrap_err();
+    let context_err = err.to_string();
+    let custom_err = err.err.to_string();
+    assert_eq!(context_err, "CustomError(2)");
+    assert_eq!(custom_err, "CustomError(1)");
 }
 
 #[test]
