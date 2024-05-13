@@ -3,7 +3,7 @@ use quote::{quote, ToTokens};
 use syn::{parse_quote, spanned::Spanned, Block, Expr, ExprClosure, ImplItemFn, ReturnType, Type};
 
 use crate::{
-    errify_macro::input::{Args, Context, ExplicitContext, Input, LazyContext},
+    input::{Args, Context, ExplicitContext, Input, LazyContext},
     utils,
 };
 
@@ -131,7 +131,7 @@ pub fn apply_context(call_expr: &Expr, cx: &Context, err_ty: &Type) -> Expr {
     match cx {
         Context::Explicit(ExplicitContext::Literal { lit, args }) => parse_quote! {
             {
-                let __errify_cx = ::errify::error!(#lit, #args);
+                let __errify_cx = ::errify::format_cx!(#lit, #args);
                 let __errify_res = #call_expr;
                 match __errify_res {
                     ::errify::__private::Ok(v) => ::errify::__private::Ok(v),

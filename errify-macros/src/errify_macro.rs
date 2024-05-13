@@ -1,11 +1,8 @@
-pub mod input;
-mod output;
-
 use proc_macro2::TokenStream;
 use proc_macro2_diagnostics::Diagnostic;
 use quote::{quote, ToTokens};
 
-use crate::errify_macro::{
+use crate::{
     input::{ErrifyMacroArgs, ErrifyWithMacroArgs, Input},
     output::Output,
 };

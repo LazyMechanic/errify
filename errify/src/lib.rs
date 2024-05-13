@@ -204,6 +204,7 @@ extern crate core;
 mod macros;
 
 use alloc::fmt::Display;
+#[cfg(any(feature = "anyhow", feature = "eyre"))]
 use std::error::Error as StdError;
 
 pub use errify_macros::{errify, errify_with};
