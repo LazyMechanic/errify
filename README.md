@@ -13,7 +13,9 @@ errify = "0.1"
 
 ## Usage example
 ```rust
-#[errify::context("Custom error context, with argument capturing {arg} = {}", arg)]
+use errify::errify;
+
+#[errify("Custom error context, with argument capturing {arg} = {}", arg)]
 fn func(arg: i32) -> Result<(), CustomError> {
     // ...
 }
