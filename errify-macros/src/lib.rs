@@ -6,7 +6,14 @@ use proc_macro::TokenStream;
 use crate::errify_macro::{errify_impl, errify_with_impl};
 
 /// Macro that provides error context on entire function.
-/// Supports `async` and `unsafe` functions.
+/// Supports `async` functions.
+///
+/// Constraint is `T: Display + Send + Sync + 'static`.
+///
+/// # Syntax
+/// ```text
+/// #[errify( $($err_ty:ty),? $( $fmt:literal $(, $arg:expr)* ) | $expr:expr )]
+/// ```
 ///
 /// # Usage example
 ///
@@ -29,8 +36,19 @@ use crate::errify_macro::{errify_impl, errify_with_impl};
 ///     // ...
 /// }
 /// ```
-/// Constraint is `T: Display + Send + Sync + 'static`.
 ///
+/// ### Custom error type
+/// ```ignore
+/// use errify::{errify, WrapErr};
+///
+/// struct CustomError { ... }
+/// impl WrapErr<CustomError> for CustomError { ... }
+///
+/// #[errify(CustomError, "Custom error context")]
+/// fn func(arg: i32) -> Result<(), CustomError> {
+///     // ...
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn errify(args: TokenStream, input: TokenStream) -> TokenStream {
     match errify_impl(args.into(), input.into()) {
@@ -40,7 +58,14 @@ pub fn errify(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 /// Macro that provides lazy error context on entire function.
-/// Supports `async` and `unsafe` functions.
+/// Supports `async` functions.
+///
+/// Constraint is `F: FnOnce() -> impl Display + Send + Sync + 'static`.
+///
+/// # Syntax
+/// ```text
+/// #[errify_with( $($err_ty:ty),? $closure:expr | $func:ident )]
+/// ```
 ///
 /// # Usage example
 ///
@@ -66,7 +91,18 @@ pub fn errify(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// Constraint is `F: FnOnce() -> impl Display + Send + Sync + 'static`.
+/// ### Custom error type
+/// ```ignore
+/// use errify::{errify_with, WrapErr};
+///
+/// struct CustomError { ... }
+/// impl WrapErr<CustomError> for CustomError { ... }
+///
+/// #[errify_with(CustomError, || "Custom error context")]
+/// fn func(arg: i32) -> Result<(), CustomError> {
+///     // ...
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn errify_with(args: TokenStream, input: TokenStream) -> TokenStream {
     match errify_with_impl(args.into(), input.into()) {

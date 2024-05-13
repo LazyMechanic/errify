@@ -7,8 +7,8 @@
 //! - `anyhow` *(enabled by default)*: Enables error and context providers via the [`anyhow`] crate
 //! - `eyre`: Enables error and context providers via the [`eyre`] crate
 //!
-//! Simultaneously enabling both features when using the [`errify`],
-//! or [`errify_with`] macros will result in a compilation error.
+//! Simultaneously enabling both features when using the [`errify`], or [`errify_with`] macros
+//! will result in a compilation error if the error type is not specified [explicitly](#specify-error-type-explicitly).
 //!
 //! ### Simple context
 //!
@@ -53,30 +53,33 @@
 //! #         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { unimplemented!() }
 //! #     }
 //! #     impl std::error::Error for Error {}
-//! #
-//! #     pub trait Context<T>: Sized {
-//! #         fn context(self, cx: impl std::fmt::Display) -> Result<T, Error> { unimplemented!() }
+//! #     impl<E> errify::WrapErr<E> for Error
+//! #         where
+//! #             E: std::error::Error + Send + Sync + 'static,
+//! #     {
+//! #         fn wrap_err<C>(err: E, context: C) -> Self
+//! #             where
+//! #                 C: std::fmt::Display + Send + Sync + 'static,
+//! #         {
+//! #             unimplemented!()
+//! #         }
 //! #     }
-//! #     impl<T, E> Context<T> for Result<T, E> {}
-//! #
-//! #     macro_rules! anyhow {
-//! #         ($($tt:tt)*) => { "" }
-//! #     }
-//! #     pub(crate) use anyhow;
 //! # }
 //! fn func(arg: i32) -> Result<(), anyhow::Error> {
-//!     let ctx = anyhow::anyhow!("Custom error context, with argument capturing {arg} = {}", arg);
-//!     anyhow::Context::context(
-//!         {
-//!             // Type inference hack
-//!             let result: Result<(), CustomError> = (move || {
-//!                 // ...
-//!                 # Err(CustomError)
-//!             })();
-//!             result
-//!         },
-//!         ctx,
-//!     )
+//!     let cx = std::borrow::Cow::<'static, str>::Owned(format!("Custom error context, with argument capturing {arg} = {}", arg));
+//!     let res = {
+//!         let f = move || {
+//!             // ...
+//!             # Err(CustomError)
+//!         };
+//!         // Type inference hack
+//!         let f_res: Result<(), CustomError> = (f)();
+//!         f_res
+//!     };
+//!     match res {
+//!         Ok(v) => Ok(v),
+//!         Err(err) => Err(<anyhow::Error as errify::WrapErr<_>>::wrap_err(err, cx)),
+//!     }
 //! }
 //! ```
 //!
@@ -138,7 +141,56 @@
 //!
 //! You can use either a lambda or define free function.
 //!
-//! Macros also support `async` and `unsafe` functions.
+//! Macros also support `async` functions.
+//!
+//! ### Specify error type explicitly
+//!
+//! If you don't want to use `anyhow::Error` / `eyre::Report` and want to use your own error type,
+//! there is also a solution:
+//!
+//! ```
+//! # use errify::errify;
+//! # #[derive(Debug, Eq, PartialEq)]
+//! # struct CustomError;
+//! # impl std::fmt::Display for CustomError {
+//! #     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//! #         f.write_fmt(format_args!("{self:?}"))
+//! #     }
+//! # }
+//! # impl std::error::Error for CustomError {}
+//! // Create your type
+//! struct ErrorWithContext {
+//!     cause: CustomError,
+//!     cx: String,
+//! }
+//!
+//! // Implement `errify::WrapErr`
+//! impl errify::WrapErr<CustomError> for ErrorWithContext {
+//!     fn wrap_err<C>(err: CustomError, context: C) -> Self
+//!     where
+//!         C: std::fmt::Display + Send + Sync + 'static,
+//!     {
+//!         Self {
+//!             cause: err,
+//!             cx: context.to_string(),
+//!         }
+//!     }
+//! }
+//!
+//! // Specify the type as the first macro argument
+//! #[errify(ErrorWithContext, "error context")]
+//! fn func(arg: i32) -> Result<(), CustomError> {
+//!     // ...
+//!     # Err(CustomError)
+//! }
+//!
+//! # if let Err(err) = func(123) {
+//! #     assert_eq!(err.cx, "error context");
+//! #     assert_eq!(err.cause, CustomError);
+//! # }
+//! ```
+//!
+//! [`errify_with`] also supports a custom error type.
 //!
 //! [`anyhow`]: https://docs.rs/anyhow/latest/anyhow/
 //! [`eyre`]: https://docs.rs/eyre/latest/eyre/

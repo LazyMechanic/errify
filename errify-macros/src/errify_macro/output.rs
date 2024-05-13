@@ -134,8 +134,8 @@ pub fn apply_context(call_expr: &Expr, cx: &Context, err_ty: &Type) -> Expr {
                 let __errify_cx = ::errify::error!(#lit, #args);
                 let __errify_res = #call_expr;
                 match __errify_res {
-                    ::errify::__private::Ok(v) => Ok(v),
-                    ::errify::__private::Err(err) => Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, __errify_cx)),
+                    ::errify::__private::Ok(v) => ::errify::__private::Ok(v),
+                    ::errify::__private::Err(err) => ::errify::__private::Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, __errify_cx)),
                 }
             }
         },
@@ -144,8 +144,8 @@ pub fn apply_context(call_expr: &Expr, cx: &Context, err_ty: &Type) -> Expr {
                 let __errify_cx = #expr;
                 let __errify_res = #call_expr;
                 match __errify_res {
-                    ::errify::__private::Ok(v) => Ok(v),
-                    ::errify::__private::Err(err) => Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, __errify_cx)),
+                    ::errify::__private::Ok(v) => ::errify::__private::Ok(v),
+                    ::errify::__private::Err(err) => ::errify::__private::Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, __errify_cx)),
                 }
             }
         },
@@ -154,8 +154,8 @@ pub fn apply_context(call_expr: &Expr, cx: &Context, err_ty: &Type) -> Expr {
                 let __errify_cx = #def;
                 let __errify_res = #call_expr;
                 match __errify_res {
-                    ::errify::__private::Ok(v) => Ok(v),
-                    ::errify::__private::Err(err) => Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, (__errify_cx)())),
+                    ::errify::__private::Ok(v) => ::errify::__private::Ok(v),
+                    ::errify::__private::Err(err) => ::errify::__private::Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, (__errify_cx)())),
                 }
             }
         },
@@ -163,8 +163,8 @@ pub fn apply_context(call_expr: &Expr, cx: &Context, err_ty: &Type) -> Expr {
             {
                 let __errify_res = #call_expr;
                 match __errify_res {
-                    ::errify::__private::Ok(v) => Ok(v),
-                    ::errify::__private::Err(err) => Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, #path())),
+                    ::errify::__private::Ok(v) => ::errify::__private::Ok(v),
+                    ::errify::__private::Err(err) => ::errify::__private::Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, #path())),
                 }
             }
         },

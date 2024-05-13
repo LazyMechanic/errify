@@ -78,6 +78,56 @@ fn custom_error_function() {
     assert_eq!(custom_err, "CustomError(1)");
 }
 
+
+#[test]
+fn method() {
+    #[derive(Debug)]
+    struct Struct;
+
+    impl Struct {
+        #[errify_with(|| format!("literal self = {self:?}, arg = {}", arg))]
+        fn func(&self, arg: String) -> Result<i32, CustomError> {
+            Err(CustomError(0))
+        }
+    }
+
+    let err = Struct.func("argument".to_owned()).unwrap_err();
+    let context_err = err.to_string();
+    let custom_err = err.root_cause().to_string();
+    assert_eq!(context_err, "literal self = Struct, arg = argument");
+    assert_eq!(custom_err, "CustomError(0)");
+}
+
+#[test]
+fn trait_method() {
+    #[derive(Debug)]
+    struct TraitError(Option<String>);
+    impl WrapErr<TraitError> for TraitError {
+        fn wrap_err<C>(mut err: TraitError, context: C) -> Self where C: Display + Send + Sync + 'static {
+            err.0 = Some(context.to_string());
+            err
+        }
+    }
+
+    trait Trait {
+        fn func(&self, arg: String) -> Result<i32, TraitError>;
+    }
+
+    #[derive(Debug)]
+    struct Struct;
+
+    impl Trait for Struct {
+        #[errify_with(TraitError, || format!("literal self = {self:?}, arg = {}", arg))]
+        fn func(&self, arg: String) -> Result<i32, TraitError> {
+            Err(TraitError(None))
+        }
+    }
+
+    let err = Trait::func(&Struct, "argument".to_owned()).unwrap_err();
+    let context_err = format!("{err:?}");
+    assert_eq!(context_err, r#"TraitError(Some("literal self = Struct, arg = argument"))"#);
+}
+
 #[test]
 fn simple_closure() {
     #[errify_with(|| format!("literal {arg}"))]
