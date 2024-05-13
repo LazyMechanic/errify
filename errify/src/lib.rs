@@ -208,8 +208,7 @@ extern crate core;
 mod macros;
 
 use alloc::fmt::Display;
-#[cfg(any(feature = "anyhow", feature = "eyre"))]
-use std::error::Error as StdError;
+use core::fmt::Debug;
 
 pub use errify_macros::{errify, errify_with};
 
@@ -229,26 +228,26 @@ pub trait WrapErr<E> {
 #[cfg(feature = "anyhow")]
 impl<E> WrapErr<E> for anyhow::Error
 where
-    E: StdError + Send + Sync + 'static,
+    E: Display + Debug + Send + Sync + 'static,
 {
     fn wrap_err<C>(err: E, context: C) -> Self
     where
         C: Display + Send + Sync + 'static,
     {
-        anyhow::Error::from(err).context(context)
+        anyhow::anyhow!(err).context(context)
     }
 }
 
 #[cfg(feature = "eyre")]
 impl<E> WrapErr<E> for eyre::Report
 where
-    E: StdError + Send + Sync + 'static,
+    E: Display + Debug + Send + Sync + 'static,
 {
     fn wrap_err<C>(err: E, context: C) -> Self
     where
         C: Display + Send + Sync + 'static,
     {
-        eyre::Report::from(err).wrap_err(context)
+        eyre::eyre!(err).wrap_err(context)
     }
 }
 
