@@ -145,12 +145,110 @@
 //! [`errify`]: errify_macros::errify
 //! [`errify_with`]: errify_macros::errify_with
 
+extern crate alloc;
+
+#[macro_use]
+mod macros;
+
+use alloc::fmt::{Debug, Display};
+use std::error::Error as StdError;
+
 pub use errify_macros::{errify, errify_with};
+
+pub trait Error {
+    fn msg<M>(msg: M) -> Self
+    where
+        M: Display + Debug + Send + Sync + 'static;
+}
+
+pub trait WrapErr<E> {
+    /// Wrap the error value with additional context.
+    fn wrap_err<C>(err: E, context: C) -> Self
+    where
+        C: Display + Send + Sync + 'static;
+}
+
+#[cfg(feature = "anyhow")]
+impl<E> WrapErr<E> for anyhow::Error
+where
+    E: StdError + Send + Sync + 'static,
+{
+    fn wrap_err<C>(err: E, context: C) -> Self
+    where
+        C: Display + Send + Sync + 'static,
+    {
+        anyhow::Error::from(err).context(context)
+    }
+}
+
+#[cfg(feature = "anyhow")]
+impl Error for anyhow::Error {
+    fn msg<M>(context: M) -> Self
+    where
+        M: Display + Debug + Send + Sync + 'static,
+    {
+        anyhow::Error::msg(context)
+    }
+}
+
+#[cfg(feature = "eyre")]
+impl<E> WrapErr<E> for eyre::Report
+where
+    E: StdError + Send + Sync + 'static,
+{
+    fn wrap_err<C>(err: E, context: C) -> Self
+    where
+        C: Display + Send + Sync + 'static,
+    {
+        eyre::Report::from(err).wrap_err(context)
+    }
+}
+
+#[cfg(feature = "eyre")]
+impl Error for eyre::Error {
+    fn msg<C>(msg: C) -> Self
+    where
+        C: Display + Debug + Send + Sync + 'static,
+    {
+        eyre::Report::msg(msg)
+    }
+}
 
 #[doc(hidden)]
 pub mod __private {
+    use alloc::fmt;
+    #[doc(hidden)]
+    pub use alloc::format;
+    use core::fmt::Arguments;
+    #[doc(hidden)]
+    pub use core::format_args;
+    #[doc(hidden)]
+    pub use core::result::{
+        Result,
+        Result::{Err, Ok},
+    };
+
     #[cfg(feature = "anyhow")]
+    #[doc(hidden)]
     pub use anyhow;
     #[cfg(feature = "eyre")]
+    #[doc(hidden)]
     pub use eyre;
+
+    use crate::Error;
+
+    #[doc(hidden)]
+    #[inline]
+    pub fn format_err<E>(args: Arguments) -> E
+    where
+        E: Error,
+    {
+        if let Some(message) = args.as_str() {
+            // error!("literal"), can downcast to &'static str
+            Error::msg(message)
+        } else {
+            // error!("interpolate {var}"), can downcast to String
+            Error::msg(fmt::format(args))
+        }
+    }
 }
