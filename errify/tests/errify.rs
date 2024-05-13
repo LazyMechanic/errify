@@ -53,6 +53,26 @@ impl<E: Error + 'static> WrapErr<E> for CustomErrorWithContext {
 }
 
 #[test]
+fn check_visability() {
+    pub mod multiple {
+        use super::*;
+        pub mod module {
+            use super::*;
+            #[errify("literal")]
+            pub fn test(arg: i32) -> Result<i32, CustomError> {
+                Err(CustomError(arg))
+            }
+        }
+    }
+
+    let err = multiple::module::test(1).unwrap_err();
+    let context_err = err.to_string();
+    let custom_err = err.root_cause().to_string();
+    assert_eq!(context_err, "literal");
+    assert_eq!(custom_err, "CustomError(1)");
+}
+
+#[test]
 fn custom_error_literal() {
     #[errify(CustomErrorWithContext, "literal {arg} = {}", arg)]
     fn test(arg: i32) -> Result<i32, CustomError> {

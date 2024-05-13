@@ -91,6 +91,7 @@ impl Output {
 
         let outer_fn: ImplItemFn = {
             let attrs = &input.func.attrs;
+            let vis = &input.func.vis;
             let defaultness = &input.func.defaultness;
             let constness = &input.func.sig.constness;
             let asyncness = &input.func.sig.asyncness;
@@ -113,7 +114,7 @@ impl Output {
 
             parse_quote! {
                 #(#attrs)*
-                #defaultness #constness #asyncness #unsafety #abi fn #ident #generics_impl ( #inputs ) #ret #generics_where #block
+                #vis #defaultness #constness #asyncness #unsafety #abi fn #ident #generics_impl ( #inputs ) #ret #generics_where #block
             }
         };
 
