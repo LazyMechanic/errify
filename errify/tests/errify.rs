@@ -231,8 +231,8 @@ fn trait_method() {
     struct TraitError(Option<String>);
     impl WrapErr<TraitError> for TraitError {
         fn wrap_err<C>(mut err: TraitError, context: C) -> Self
-            where
-                C: Display + Send + Sync + 'static,
+        where
+            C: Display + Send + Sync + 'static,
         {
             err.0 = Some(context.to_string());
             err
@@ -295,7 +295,6 @@ fn anyhow_error() {
     assert_eq!(context_err, "literal 1 = 1");
     assert_eq!(custom_err, "error 1");
 
-
     #[cfg(feature = "eyre")]
     {
         #[errify(anyhow::Error, "literal {arg} = {}", arg)]
@@ -311,7 +310,6 @@ fn anyhow_error() {
     }
 }
 
-
 #[cfg(feature = "eyre")]
 #[test]
 fn eyre_error() {
@@ -325,7 +323,6 @@ fn eyre_error() {
     let custom_err = err.root_cause().to_string();
     assert_eq!(context_err, "literal 1 = 1");
     assert_eq!(custom_err, "error 1");
-
 
     #[cfg(feature = "anyhow")]
     {
