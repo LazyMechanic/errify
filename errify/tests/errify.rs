@@ -1,9 +1,9 @@
 mod utils;
 
 use std::ops::Deref;
-use utils::*;
 
 use errify::errify;
+use utils::*;
 
 #[test]
 fn literal_position_arg() {
@@ -127,7 +127,10 @@ fn method() {
 
     let err = Struct.func("argument".to_owned()).unwrap_err();
     assert_eq!(err.msg.deref(), "argument");
-    assert_eq!(err.cx.as_deref(), Some("literal self = Struct, arg = argument"));
+    assert_eq!(
+        err.cx.as_deref(),
+        Some("literal self = Struct, arg = argument")
+    );
 }
 
 #[test]
@@ -148,7 +151,10 @@ fn trait_method() {
 
     let err = Trait::func(&Struct, "argument".to_owned()).unwrap_err();
     assert_eq!(err.msg.deref(), "argument");
-    assert_eq!(err.cx.as_deref(), Some("literal self = Struct, arg = argument"));
+    assert_eq!(
+        err.cx.as_deref(),
+        Some("literal self = Struct, arg = argument")
+    );
 }
 
 #[test]

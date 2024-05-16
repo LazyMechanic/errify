@@ -1,10 +1,9 @@
 mod utils;
 
-use std::fmt::Display;
-use std::ops::Deref;
-use utils::*;
+use std::{fmt::Display, ops::Deref};
 
 use errify::errify_with;
+use utils::*;
 
 #[test]
 fn simple_closure() {
