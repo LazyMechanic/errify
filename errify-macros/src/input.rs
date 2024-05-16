@@ -1,76 +1,36 @@
 use syn::{
-    parse::{discouraged::Speculative, Parse, ParseStream},
+    parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    Expr, ExprClosure, ImplItemFn, LitStr, Path, Token, Type,
+    Expr, ExprClosure, ImplItemFn, LitStr, Path, Token,
 };
 
 pub struct ErrifyMacroArgs {
-    err_ty: Option<Type>,
-    cx: ExplicitContext,
+    cx: ImmediateContext,
 }
 
 impl Parse for ErrifyMacroArgs {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let input_fork = input.fork();
-        if let Ok(err_ty) = input_fork.parse::<Type>() {
-            let comma = input_fork.parse::<Option<Token![,]>>()?;
-            if comma.is_some() {
-                let res = Self {
-                    err_ty: Some(err_ty),
-                    cx: input_fork.parse()?,
-                };
-
-                input.advance_to(&input_fork);
-
-                return Ok(res);
-            }
-        }
-
-        Ok(Self {
-            err_ty: None,
-            cx: input.parse()?,
-        })
+        Ok(Self { cx: input.parse()? })
     }
 }
 
 pub struct ErrifyWithMacroArgs {
-    err_ty: Option<Type>,
     cx: LazyContext,
 }
 
 impl Parse for ErrifyWithMacroArgs {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let input_fork = input.fork();
-        if let Ok(err_ty) = input_fork.parse::<Type>() {
-            let comma = input_fork.parse::<Option<Token![,]>>()?;
-            if comma.is_some() {
-                let res = Self {
-                    err_ty: Some(err_ty),
-                    cx: input_fork.parse()?,
-                };
-
-                input.advance_to(&input_fork);
-
-                return Ok(res);
-            }
-        }
-
-        Ok(Self {
-            err_ty: None,
-            cx: input.parse()?,
-        })
+        Ok(Self { cx: input.parse()? })
     }
 }
 
 pub struct Args {
-    pub err_ty: Option<Type>,
     pub cx: Context,
 }
 
 impl From<ErrifyMacroArgs> for Args {
     fn from(value: ErrifyMacroArgs) -> Self {
         Self {
-            err_ty: value.err_ty,
             cx: value.cx.into(),
         }
     }
@@ -79,20 +39,19 @@ impl From<ErrifyMacroArgs> for Args {
 impl From<ErrifyWithMacroArgs> for Args {
     fn from(value: ErrifyWithMacroArgs) -> Self {
         Self {
-            err_ty: value.err_ty,
             cx: value.cx.into(),
         }
     }
 }
 
 pub enum Context {
-    Explicit(ExplicitContext),
+    Immediate(ImmediateContext),
     Lazy(LazyContext),
 }
 
-impl From<ExplicitContext> for Context {
-    fn from(value: ExplicitContext) -> Self {
-        Self::Explicit(value)
+impl From<ImmediateContext> for Context {
+    fn from(value: ImmediateContext) -> Self {
+        Self::Immediate(value)
     }
 }
 
@@ -102,7 +61,7 @@ impl From<LazyContext> for Context {
     }
 }
 
-pub enum ExplicitContext {
+pub enum ImmediateContext {
     Literal {
         lit: LitStr,
         args: Punctuated<Expr, Token![,]>,
@@ -112,7 +71,7 @@ pub enum ExplicitContext {
     },
 }
 
-impl Parse for ExplicitContext {
+impl Parse for ImmediateContext {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let res = if input.peek(LitStr) {
             let lit = input.parse()?;

@@ -1,7 +1,6 @@
 mod errify_macro;
 mod input;
 mod output;
-mod utils;
 
 use proc_macro::TokenStream;
 
@@ -10,11 +9,11 @@ use crate::errify_macro::{errify_impl, errify_with_impl};
 /// Macro that provides error context on entire function.
 /// Supports `async` functions.
 ///
-/// Constraint is `T: Display + Send + Sync + 'static`.
+/// Constraints are `T: Display + Send + Sync + 'static` and `E: WrapErr`.
 ///
 /// # Syntax
 /// ```text
-/// #[errify( $($err_ty:ty),? $( $fmt:literal $(, $arg:expr)* ) | $expr:expr )]
+/// #[errify( $( $fmt:literal $(, $arg:expr)* ) | $expr:expr )]
 /// ```
 ///
 /// # Usage example
@@ -38,19 +37,6 @@ use crate::errify_macro::{errify_impl, errify_with_impl};
 ///     // ...
 /// }
 /// ```
-///
-/// ### Custom error type
-/// ```ignore
-/// use errify::{errify, WrapErr};
-///
-/// struct CustomError { ... }
-/// impl WrapErr<CustomError> for CustomError { ... }
-///
-/// #[errify(CustomError, "Custom error context")]
-/// fn func(arg: i32) -> Result<(), CustomError> {
-///     // ...
-/// }
-/// ```
 #[proc_macro_attribute]
 pub fn errify(args: TokenStream, input: TokenStream) -> TokenStream {
     match errify_impl(args.into(), input.into()) {
@@ -62,11 +48,11 @@ pub fn errify(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Macro that provides lazy error context on entire function.
 /// Supports `async` functions.
 ///
-/// Constraint is `F: FnOnce() -> impl Display + Send + Sync + 'static`.
+/// Constraint is `F: FnOnce() -> impl Display + Send + Sync + 'static` and `E: WrapErr`.
 ///
 /// # Syntax
 /// ```text
-/// #[errify_with( $($err_ty:ty),? $closure:expr | $func:ident )]
+/// #[errify_with( $closure:expr | $func:ident )]
 /// ```
 ///
 /// # Usage example
@@ -88,19 +74,6 @@ pub fn errify(args: TokenStream, input: TokenStream) -> TokenStream {
 /// fn context_provider() -> impl Display { "Context from function" }
 ///
 /// #[errify_with(context_provider)]
-/// fn func(arg: i32) -> Result<(), CustomError> {
-///     // ...
-/// }
-/// ```
-///
-/// ### Custom error type
-/// ```ignore
-/// use errify::{errify_with, WrapErr};
-///
-/// struct CustomError { ... }
-/// impl WrapErr<CustomError> for CustomError { ... }
-///
-/// #[errify_with(CustomError, || "Custom error context")]
 /// fn func(arg: i32) -> Result<(), CustomError> {
 ///     // ...
 /// }

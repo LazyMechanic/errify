@@ -1,11 +1,8 @@
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{parse_quote, spanned::Spanned, Block, Expr, ExprClosure, ImplItemFn, ReturnType, Type};
+use syn::{parse_quote, spanned::Spanned, Block, Expr, ExprClosure, ImplItemFn, ReturnType};
 
-use crate::{
-    input::{Args, Context, ExplicitContext, Input, LazyContext},
-    utils,
-};
+use crate::input::{Args, Context, ImmediateContext, Input, LazyContext};
 
 pub struct Output {
     func: ImplItemFn,
@@ -57,37 +54,7 @@ impl Output {
             }
         };
 
-        let err_ty = match args.err_ty {
-            #[allow(unreachable_code)]
-            None => 'err_ty: {
-                if cfg!(feature = "anyhow") && cfg!(feature = "eyre") {
-                    return Err(syn::Error::new(
-                        Span::call_site(),
-                        "Ambiguous error type. Choose either `anyhow` or `eyre`",
-                    ));
-                }
-
-                if !cfg!(feature = "anyhow") && !cfg!(feature = "eyre") {
-                    return Err(syn::Error::new(
-                        Span::call_site(),
-                        "None of the `anyhow` or `eyre` features are enabled",
-                    ));
-                }
-
-                #[cfg(feature = "anyhow")]
-                {
-                    break 'err_ty parse_quote! { ::errify::__private::anyhow::Error };
-                }
-
-                #[cfg(feature = "eyre")]
-                {
-                    break 'err_ty parse_quote! { ::errify::__private::eyre::Report };
-                }
-            }
-            Some(ty) => ty,
-        };
-
-        let cx_expr = apply_context(&call_expr, &args.cx, &err_ty);
+        let cx_expr = apply_context(&call_expr, &args.cx);
 
         let outer_fn: ImplItemFn = {
             let attrs = &input.func.attrs;
@@ -101,11 +68,7 @@ impl Output {
             let ident = &input.func.sig.ident;
             let (generics_impl, _generics_ty, generics_where) =
                 input.func.sig.generics.split_for_impl();
-            let ret: ReturnType = {
-                let ok = utils::ok_ty(&input.func.sig.output)?;
-                let err = err_ty;
-                parse_quote! { -> ::errify::__private::Result<#ok, #err> }
-            };
+            let ret = &input.func.sig.output;
             let block: Block = parse_quote! {
                 {
                     #cx_expr
@@ -128,25 +91,25 @@ impl ToTokens for Output {
     }
 }
 
-pub fn apply_context(call_expr: &Expr, cx: &Context, err_ty: &Type) -> Expr {
+pub fn apply_context(call_expr: &Expr, cx: &Context) -> Expr {
     match cx {
-        Context::Explicit(ExplicitContext::Literal { lit, args }) => parse_quote! {
+        Context::Immediate(ImmediateContext::Literal { lit, args }) => parse_quote! {
             {
                 let __errify_cx = ::errify::format_cx!(#lit, #args);
                 let __errify_res = #call_expr;
                 match __errify_res {
                     ::errify::__private::Ok(v) => ::errify::__private::Ok(v),
-                    ::errify::__private::Err(err) => ::errify::__private::Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, __errify_cx)),
+                    ::errify::__private::Err(err) => ::errify::__private::Err(::errify::WrapErr::wrap_err(err, __errify_cx)),
                 }
             }
         },
-        Context::Explicit(ExplicitContext::Expr { expr }) => parse_quote! {
+        Context::Immediate(ImmediateContext::Expr { expr }) => parse_quote! {
             {
                 let __errify_cx = #expr;
                 let __errify_res = #call_expr;
                 match __errify_res {
                     ::errify::__private::Ok(v) => ::errify::__private::Ok(v),
-                    ::errify::__private::Err(err) => ::errify::__private::Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, __errify_cx)),
+                    ::errify::__private::Err(err) => ::errify::__private::Err(::errify::WrapErr::wrap_err(err, __errify_cx)),
                 }
             }
         },
@@ -156,7 +119,7 @@ pub fn apply_context(call_expr: &Expr, cx: &Context, err_ty: &Type) -> Expr {
                 let __errify_res = #call_expr;
                 match __errify_res {
                     ::errify::__private::Ok(v) => ::errify::__private::Ok(v),
-                    ::errify::__private::Err(err) => ::errify::__private::Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, (__errify_cx)())),
+                    ::errify::__private::Err(err) => ::errify::__private::Err(::errify::WrapErr::wrap_err(err, (__errify_cx)())),
                 }
             }
         },
@@ -165,7 +128,7 @@ pub fn apply_context(call_expr: &Expr, cx: &Context, err_ty: &Type) -> Expr {
                 let __errify_res = #call_expr;
                 match __errify_res {
                     ::errify::__private::Ok(v) => ::errify::__private::Ok(v),
-                    ::errify::__private::Err(err) => ::errify::__private::Err(<#err_ty as ::errify::WrapErr<_>>::wrap_err(err, #path())),
+                    ::errify::__private::Err(err) => ::errify::__private::Err(::errify::WrapErr::wrap_err(err, #path())),
                 }
             }
         },

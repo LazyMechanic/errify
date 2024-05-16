@@ -4,7 +4,7 @@
 [<img alt="docs.rs" src="https://img.shields.io/docsrs/errify?style=flat-square">](https://docs.rs/errify)
 [<img alt="build" src="https://img.shields.io/github/actions/workflow/status/LazyMechanic/errify/ci.yml?branch=master&style=flat-square">](https://github.com/LazyMechanic/errify/actions)
 
-This library provides the macros that provide error context for the entire function via [`anyhow`](https://docs.rs/anyhow/latest/anyhow/) and [`eyre`](https://docs.rs/eyre/latest/eyre/) crates.
+This library provides the macros that provide error context for the entire function.
 
 ```toml
 [dependencies]
@@ -16,7 +16,7 @@ errify = "0.2"
 use errify::errify;
 
 #[errify("Custom error context, with argument capturing {arg} = {}", arg)]
-fn func(arg: i32) -> Result<(), CustomError> {
+fn func(arg: i32) -> Result<(), anyhow::Error> {
     // ...
 }
 ```
