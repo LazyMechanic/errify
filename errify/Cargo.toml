@@ -3,7 +3,7 @@ name = "errify"
 description = "Function error context provider"
 authors = ["LazyMechanic <asharnrus@gmail.com>"]
 license = "MIT OR Apache-2.0"
-version = "0.2.2"
+version = "0.3.0"
 repository = "https://github.com/LazyMechanic/errify"
 documentation = "https://docs.rs/errify"
 keywords = ["context", "error", "error-context", "anyhow", "eyre"]
@@ -13,7 +13,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-errify-macros = { version = "0.2.1", path = "../errify-macros", default-features = false }
+errify-macros = { version = "0.3.0", path = "../errify-macros", default-features = false }
 
 anyhow = { version = "1.0", optional = true }
 eyre = { version = "0.6", optional = true }

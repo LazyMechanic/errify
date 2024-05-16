@@ -8,7 +8,7 @@ This library provides the macros that provide error context for the entire funct
 
 ```toml
 [dependencies]
-errify = "0.2"
+errify = "0.3"
 ```
 
 ## Usage example

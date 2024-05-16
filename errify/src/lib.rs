@@ -164,9 +164,9 @@ use alloc::fmt::Display;
 
 pub use errify_macros::{errify, errify_with};
 
-/// Provides the `wrap_err` associated function for the error type.
+/// Provides the `wrap_err` method for the error type.
 ///
-/// Implements for your own type if you want to use your custom error type as an error in macros.
+/// Implement for your own error type if you want to use it as an error in macros.
 pub trait WrapErr {
     /// Wrap the error value with additional context.
     ///
