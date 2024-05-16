@@ -15,7 +15,7 @@
 //! ### Immediate context
 //!
 //! To get started, add the attribute macro to the function for which you want to add error context
-//! and implement [`errify::WrapErr`] for your error:
+//! and implement [`WrapErr`] for your error:
 //! ```
 //! use errify::errify;
 //!
