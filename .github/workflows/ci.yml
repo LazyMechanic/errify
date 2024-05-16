@@ -45,19 +45,10 @@ jobs:
           toolchain: nightly
           components: clippy
 
-      - name: 'Clippy (errify + default)'
-        run: cargo clippy --package errify -- -D warnings
-      - name: 'Clippy (errify + anyhow)'
-        run: cargo clippy --features=anyhow --no-default-features --package errify -- -D warnings
-      - name: 'Clippy (errify + eyre)'
-        run: cargo clippy --features=eyre --no-default-features --package errify -- -D warnings
-
-      - name: 'Clippy (errify-macros + default)'
-        run: cargo clippy --package errify-macros -- -D warnings
-      - name: 'Clippy (errify-macros + anyhow)'
-        run: cargo clippy --features=anyhow --no-default-features --package errify-macros -- -D warnings
-      - name: 'Clippy (errify-macros + eyre)'
-        run: cargo clippy --features=eyre --no-default-features --package errify-macros -- -D warnings
+      - name: 'Clippy (errify)'
+        run: cargo clippy --all-features --package errify -- -D warnings
+      - name: 'Clippy (errify-macros)'
+        run: cargo clippy --all-features --package errify-macros -- -D warnings
 
   test:
     runs-on: ubuntu-latest
@@ -67,16 +58,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@nextest
 
-      - name: 'Test (errify + default)'
-        run: cargo nextest run --package errify
-      - name: 'Test (errify + anyhow)'
-        run: cargo nextest run --features=anyhow --no-default-features --package errify
-      - name: 'Test (errify + eyre)'
-        run: cargo nextest run --features=eyre --no-default-features --package errify
-
-      - name: 'Test (errify-macros + default)'
-        run: cargo nextest run --package errify-macros
-      - name: 'Test (errify-macros + anyhow)'
-        run: cargo nextest run --features=anyhow --no-default-features --package errify-macros
-      - name: 'Test (errify-macros + eyre)'
-        run: cargo nextest run --features=eyre --no-default-features --package errify-macros
+      - name: 'Test (errify)'
+        run: cargo nextest run --all-features --package errify
+      - name: 'Test (errify-macros)'
+        run: cargo nextest run --all-features --package errify-macros
